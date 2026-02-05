@@ -1,0 +1,8 @@
+node_modules/
+.next/
+dist/
+build/
+.DS_Store
+*.tsbuildinfo
+next-env.d.ts
+simulate_streak.sh
