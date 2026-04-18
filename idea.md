@@ -2,83 +2,74 @@
 
 ## Project Idea
 
-SkillBarter is a fullstack web application that allows users to swap their skills with each other using time as a medium instead of money. The application is allows users to offer skills they are good at and request skills they want to learn,creating peer learning skill exchange ecosystem. 
-The system is focused on managing structured workflows such as skill matching,request handling,session scheduling and completion tracking.
+SkillBarter is a fullstack web application that allows users to swap their skills with each other using time as a medium instead of money. The application allows users to offer skills they are good at and request skills they want to learn, creating a peer-to-peer learning ecosystem. 
+The system manages the entire workflow of skill matching, request handling, time credit reservation, and session completion tracking.
 
 ---
 
 ## Problem Statement
 
-Many students and professionals wants to learn but they not have the financial resources to pay the courses.At the same time they possess skills that could help others.Existing platforms mostly focused on paid learning and don't efficiently support time based skill exchange.
-There is a need for a system that enables fair,organised and efficient skill exchange between users without involving money.
+Many students and professionals want to learn new skills but may not have the financial resources for expensive courses. At the same time, many possess valuable skills that could benefit others. Existing platforms mostly focus on paid learning and don't efficiently support non-monetary, time-based skill exchange.
+There is a need for a platform that enables fair, organized, and efficient skill exchange without involving money.
 
 ---
 
 ## Solution
 
-SkillBarter provides centralized platform where users can:
-- Create profiles listing skills they offer and skills they want to learn
-- Discover users with matching skills
-- Send and manage skill swap requests
-- Schedule learning sessions
-- Track the lifecycle of each skill swap
+SkillBarter provides a centralized platform where users can:
+- **Profile Management**: List skills offered and skills desired.
+- **Skill Discovery**: Search and browse skills from the community.
+- **Time-Based Currency**: Use "Time Credits" (1 hour = 1 credit) for fair exchange.
+- **Request Workflow**: Send, accept, or reject swap requests with integrated credit reservation.
+- **Session Tracking**: Manage learning sessions and mark them as completed.
+- **Feedback System**: Rate peers and build a reputation.
 
 ---
 
 ## Scope of the Project
 
 ### In Scope
-- User registration and authentication
-- Skill creation and management
-- Skill swap request creation
-- Acceptance or rejection of swap requests
-- Skill swap lifecycle management
-- Session scheduling
-- Rating and feedback after completion
+- User authentication and authorization (JWT).
+- Skill CRUD (Create, Read, Update, Delete).
+- Skill Marketplace (Browse available skills).
+- Swap Request Lifecycle (Pending -> Accepted/Rejected -> Completed).
+- Time Credit Management (Reservation on acceptance, Transfer on completion).
+- Notification system for swap updates.
+- User rating and review system.
 
-<!-- Thinking to implement if times allow -->
-<!-- ### Out of Scope (Future Enhancements)
-- Payments or monetary transactions
-- Video conferencing
-- AI-based recommendations
-- Real-time chat -->
+### Out of Scope
+- Real-time video conferencing (external links used).
+- Complex AI recommendations.
+- Monetary transactions.
 
 ---
 
 ## Key Features
 
-- Role-based user access (User, Admin)
-- Time-based skill exchange instead of payments
-- Structured swap request lifecycle
-- Backend-driven business logic
-- Scalable and modular system architecture
+- **Clean Architecture**: Controller-Service-Repository pattern for modularity.
+- **OOP Domain Model**: Rich entities with encapsulated business logic.
+- **Credit Safety**: Automatic credit reservation to prevent double-spending during active swaps.
+- **Premium UI**: Modern, glassmorphic design with dark mode support.
+
 ---
 
-## Target Users
-- College students
-- Self-learners
-- Peer-to-peer learning communities
-
-
-## Planned Tech Stack
+## Tech Stack
 
 ### Backend
-- Language: TypeScript
-- Runtime: Node.js
-- Framework: Express.js
-- Architecture: Controller–Service–Repository pattern
-- ORM: Prisma
-- Database: MySQL/Mongodb/postgress
+- **TypeScript / Node.js / Express.js**
+- **Prisma ORM** with SQLite
+- **OOP Principles** (BaseEntity, Specific Entities)
+- **Clean Architecture**
 
 ### Frontend
-- Framework: React.js
-- Language: TypeScript
+- **React / Next.js / TypeScript**
+- **Vanilla CSS** with modern UI patterns (Glassmorphism, HSL colors).
+
 ---
 
 ## Design Focus
 
-The backend is the primary focus of this project and is designed using:
-- Object-Oriented Programming principles
-- Clean separation of concerns
-- Well-defined workflows and state transitions
-- Extensible system design for future enhancements
+The project demonstrates a high-quality backend focus (75%) with robust business logic, while maintaining a polished and functional frontend (25%).
+- **Separation of Concerns**: Each layer (Route, Controller, Service, Repository) has a single responsibility.
+- **State Management**: Well-defined state transitions for swap requests.
+- **Scalability**: Decoupled components through dependency injection patterns.

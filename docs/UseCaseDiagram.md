@@ -1,32 +1,55 @@
-# Use Case Diagram – SkillBarter System
+# Use Case Diagram - SkillBarter
 
-![Use Case Diagram](./images/UseCasediagram.png)
+The Use Case Diagram illustrates the interactions between users and the SkillBarter system.
 
-## Use Cases
+```mermaid
+useCaseDiagram
+    actor User
+    actor "Other User" as Other
+    actor Admin
 
-### Authentication & Profile
-- Register, Login, Manage Profile
+    package "SkillBarter System" {
+        usecase "Register & Login" as UC1
+        usecase "Manage Profile" as UC2
+        usecase "Manage Skills (CRUD)" as UC3
+        usecase "Browse/Search Marketplace" as UC4
+        usecase "Send Swap Request" as UC5
+        usecase "Manage Swap Requests (Accept/Reject)" as UC6
+        usecase "Complete Swap Session" as UC7
+        usecase "Give Review & Rating" as UC8
+        usecase "View Notifications" as UC9
+        usecase "Check Credit Balance" as UC10
+        usecase "Moderate Content" as UC11
+    }
 
-### Skill Management
-- Manage Skills, Browse Skills
+    User --> UC1
+    User --> UC2
+    User --> UC3
+    User --> UC4
+    User --> UC5
+    User --> UC6
+    User --> UC7
+    User --> UC8
+    User --> UC9
+    User --> UC10
 
-### Swap Management
-- Create Swap Request, Accept Swap Request, Reject Swap Request, Cancel Swap Request, Complete Swap
+    Other --> UC6
+    Other --> UC7
+    Other --> UC8
 
-### Credits & Notifications
-- View Time Credit Balance, Check Time Credit Balance, Reserve Credits, Transfer Credits, Send Notification
+    Admin --> UC11
 
-### Feedback
-- Give Review
+    UC5 ..> UC10 : <<include>> (Check Balance)
+    UC6 ..> UC10 : <<include>> (Reserve Credits)
+    UC7 ..> UC10 : <<include>> (Transfer Credits)
+    UC8 ..> UC7 : <<extend>> (Review after Completion)
+```
 
-## Relationships
+## Actor Descriptions
+- **User**: A regular person looking to swap skills.
+- **Other User**: The recipient of a swap request.
+- **Admin**: Responsible for platform maintenance and moderation.
 
-### <<include>> (Mandatory)
-- Create Swap Request → Check Time Credit Balance
-- Accept Swap Request → Reserve Credits
-- Complete Swap → Transfer Credits
-- Complete Swap → Send Notification
-
-### <<extend>> (Optional)
-- Give Review → Complete Swap
-
+## Key Relationships
+- **<<include>>**: Sending a request requires checking the credit balance first.
+- **<<extend>>**: Giving a review is an optional action after a swap is completed.
