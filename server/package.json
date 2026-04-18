@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "main": "dist/index.js",
   "_moduleAliases": {
-    "@services": "src/services",
-    "@repositories": "src/repositories",
-    "@controllers": "src/controllers",
-    "@middleware": "src/middleware",
-    "@entities": "src/entities"
+    "@services": "dist/services",
+    "@repositories": "dist/repositories",
+    "@controllers": "dist/controllers",
+    "@middleware": "dist/middleware",
+    "@entities": "dist/entities"
   },
   "scripts": {
     "build": "prisma generate && tsc",
