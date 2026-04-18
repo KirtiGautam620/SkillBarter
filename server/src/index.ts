@@ -1,4 +1,6 @@
-import 'module-alias/register';
+if (process.env.NODE_ENV === 'production' || !process.env.TS_NODE_DEV) {
+  require('module-alias/register');
+}
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';

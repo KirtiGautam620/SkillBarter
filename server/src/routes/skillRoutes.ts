@@ -6,7 +6,7 @@ const router = Router();
 
 router.post('/', authenticateToken, createSkill);
 router.get('/my-skills', authenticateToken, getMySkills);
-router.get('/market', authenticateToken, getAllMarketSkills);
+router.get('/market', getAllMarketSkills);
 router.put('/:id', authenticateToken, updateSkill);
 router.delete('/:id', authenticateToken, deleteSkill);
 

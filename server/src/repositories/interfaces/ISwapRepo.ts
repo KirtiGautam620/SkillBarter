@@ -5,5 +5,6 @@ export interface ISwapRepo {
   create(swap: SwapRequestEntity): Promise<SwapRequestEntity>;
   updateStatus(id: string, status: string): Promise<SwapRequestEntity>;
   findByUserId(userId: string): Promise<SwapRequestEntity[]>;
+  createSession(swapRequestId: string, meetingLink: string): Promise<any>;
 }
 

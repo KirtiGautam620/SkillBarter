@@ -30,10 +30,20 @@ export class PrismaSkillRepo implements ISkillRepo {
   }
 
   async findAll(): Promise<SkillEntity[]> {
-    const skills = await this.prisma.skill.findMany({ include: { user: true } });
+    const skills = await this.prisma.skill.findMany({ 
+      include: { 
+        user: {
+          select: {
+            id: true,
+            name: true,
+            rating: true
+          }
+        } 
+      } 
+    });
     return skills.map(s => {
       const entity = new SkillEntity(s.id, s.title, s.description, s.category, s.userId, s.createdAt, s.updatedAt);
-      (entity as any).userName = s.user.name; // Attach for the frontend
+      (entity as any).user = s.user; // Attach for the frontend
       return entity;
     });
   }

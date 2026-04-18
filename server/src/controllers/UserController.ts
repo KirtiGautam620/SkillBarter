@@ -34,6 +34,10 @@ export const updateProfile = async (req: Request, res: Response): Promise<void> 
     const userId = (req as any).user.id;
     const { name, bio, avatar } = req.body;
 
+    console.log('[DEBUG] Update Profile Request:');
+    console.log(' - Authenticated User ID (from token):', userId);
+    console.log(' - Update Data:', { name, bio, avatar });
+
     const updatedUser = await userRepo.update(userId, {
       name,
       bio,

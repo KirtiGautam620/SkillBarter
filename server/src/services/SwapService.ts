@@ -31,11 +31,12 @@ export class SwapService {
     message?: string,
     hoursOffered: number = 1
   ): Promise<SwapRequestEntity> {
-    const requester = await this.userRepo.findById(requesterId);
-    const receiver = await this.userRepo.findById(receiverId);
-
     if (!requester || !receiver) {
       throw new Error('User not found');
+    }
+
+    if (requesterId === receiverId) {
+      throw new Error('You cannot request a swap for your own skill!');
     }
 
     // Check if requester has enough credits
@@ -71,11 +72,17 @@ export class SwapService {
 
     const updated = await this.swapRepo.updateStatus(id, 'ACCEPTED');
 
+    // AUTO-CREATE SESSION for communication
+    const meetingId = id.split('-')[0]; // Simple unique meeting ID
+    const meetingLink = `https://meet.google.com/sb-${meetingId}`;
+    
+    await this.swapRepo.createSession(id, meetingLink);
+
     await this.notificationService.notify(
       swap.requesterId,
       'SWAP_ACCEPTED',
       'Swap Request Accepted',
-      `Your swap request has been accepted.`
+      `Your swap request has been accepted. Join here: ${meetingLink}`
     );
 
     return updated;

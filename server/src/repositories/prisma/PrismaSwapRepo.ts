@@ -77,5 +77,18 @@ export class PrismaSwapRepo implements ISwapRepo {
       return swapEntity;
     });
   }
+
+  async createSession(swapRequestId: string, meetingLink: string): Promise<any> {
+    return await this.prisma.session.upsert({
+      where: { swapRequestId },
+      update: { meetingLink },
+      create: { 
+        swapRequestId,
+        meetingLink,
+        scheduledAt: new Date(),
+        status: 'SCHEDULED'
+      }
+    });
+  }
 }
 
