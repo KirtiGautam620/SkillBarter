@@ -1,16 +1,28 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { SwapService } from '@services/SwapService';
+import { TimeCreditService } from '@services/TimeCreditService';
+import { NotificationService } from '@services/NotificationService';
 import { PrismaSwapRepo } from '@repositories/prisma/PrismaSwapRepo';
 import { PrismaUserRepo } from '@repositories/prisma/PrismaUserRepo';
+import { PrismaTimeCreditRepo } from '@repositories/prisma/PrismaTimeCreditRepo';
+import { PrismaNotificationRepo } from '@repositories/prisma/PrismaNotificationRepo';
+import { PrismaClient } from '@prisma/client';
 
-const swapService = new SwapService(new PrismaSwapRepo(), new PrismaUserRepo());
+const prisma = new PrismaClient();
+const swapRepo = new PrismaSwapRepo();
+const userRepo = new PrismaUserRepo();
+const creditRepo = new PrismaTimeCreditRepo();
+const notificationRepo = new PrismaNotificationRepo();
+
+const creditService = new TimeCreditService(creditRepo);
+const notificationService = new NotificationService(notificationRepo);
+const swapService = new SwapService(swapRepo, userRepo, creditService, notificationService);
 
 export const createSwapRequest = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { receiverId, offeredSkillId, requestedSkillId, message } = req.body;
+    const { receiverId, offeredSkillId, requestedSkillId, message, hoursOffered } = req.body;
     const requesterId = (req as any).user.id;
-    const swap = await swapService.createSwap(requesterId, receiverId, offeredSkillId, requestedSkillId, message);
+    const swap = await swapService.createSwap(requesterId, receiverId, offeredSkillId, requestedSkillId, message, hoursOffered);
     res.status(201).json({ swap });
   } catch (error: any) {
     res.status(400).json({ error: error.message });
@@ -27,18 +39,27 @@ export const getMySwaps = async (req: Request, res: Response): Promise<void> => 
   }
 };
 
-export const updateSwapStatus = async (req: Request, res: Response): Promise<void> => {
+export const acceptSwapRequest = async (req: Request, res: Response): Promise<void> => {
   try {
     const id = req.params.id as string;
-    const { status } = req.body;
-    const swap = await swapService.updateSwapStatus(id, status);
+    const swap = await swapService.acceptSwap(id);
     res.json({ swap });
   } catch (error: any) {
     res.status(400).json({ error: error.message });
   }
 };
 
-export const completeSession = async (req: Request, res: Response): Promise<void> => {
+export const rejectSwapRequest = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = req.params.id as string;
+    const swap = await swapService.rejectSwap(id);
+    res.json({ swap });
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+export const completeSwapRequest = async (req: Request, res: Response): Promise<void> => {
   try {
     const id = req.params.id as string;
     const swap = await swapService.completeSwap(id);
@@ -48,24 +69,24 @@ export const completeSession = async (req: Request, res: Response): Promise<void
   }
 };
 
-const prisma = new PrismaClient();
-
-export const leaveReview = async (req: Request, res: Response): Promise<void> => {
+export const updateSwapSession = async (req: Request, res: Response): Promise<void> => {
   try {
-    const id = req.params.id as string; // swap id
-    const { rating, comment, revieweeId } = req.body;
-    const reviewerId = (req as any).user.id;
+    const id = req.params.id as string;
+    const { notes, meetingLink, learningVideoLink } = req.body;
     
-    const review = await prisma.review.create({
-      data: {
-        rating,
-        comment,
-        reviewerId,
-        revieweeId,
-        swapRequestId: id as string
+    const session = await prisma.session.upsert({
+      where: { swapRequestId: id },
+      update: { notes, meetingLink, learningVideoLink },
+      create: { 
+        swapRequestId: id,
+        notes,
+        meetingLink,
+        learningVideoLink,
+        scheduledAt: new Date(),
       }
     });
-    res.status(201).json({ review });
+    
+    res.json({ session });
   } catch (error: any) {
     res.status(400).json({ error: error.message });
   }

@@ -1,8 +1,13 @@
 import { Request, Response } from 'express';
 import { AuthService } from '@services/AuthService';
+import { TimeCreditService } from '@services/TimeCreditService';
 import { PrismaUserRepo } from '@repositories/prisma/PrismaUserRepo';
+import { PrismaTimeCreditRepo } from '@repositories/prisma/PrismaTimeCreditRepo';
 
-const authService = new AuthService(new PrismaUserRepo());
+const userRepo = new PrismaUserRepo();
+const creditRepo = new PrismaTimeCreditRepo();
+const creditService = new TimeCreditService(creditRepo);
+const authService = new AuthService(userRepo, creditService);
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -23,4 +28,3 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     res.status(401).json({ error: error.message });
   }
 };
-
