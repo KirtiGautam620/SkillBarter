@@ -65,12 +65,26 @@ export default function MySwaps() {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                   <div>
                     <div style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase' }}>Offered</div>
-                    <div style={{ fontWeight: '600' }}>{swap.offeredSkill?.title || 'Unknown Skill'}</div>
+                    <div style={{ fontWeight: '600' }}>{swap.offeredSkill?.title || swap.offeredSkillTitle || 'Skill'}</div>
                   </div>
                   <div>
                     <div style={{ fontSize: '0.75rem', color: '#94a3b8', textTransform: 'uppercase' }}>Requested</div>
-                    <div style={{ fontWeight: '600' }}>{swap.requestedSkill?.title || 'Unknown Skill'}</div>
+                    <div style={{ fontWeight: '600' }}>{swap.requestedSkill?.title || swap.requestedSkillTitle || 'Skill'}</div>
                   </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>
+                  <span style={{ color: '#94a3b8' }}>Partner:</span>
+                  <span style={{ fontWeight: '600' }}>
+                    {(() => {
+                      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+                      if (!token) return 'User';
+                      try {
+                        const decoded = JSON.parse(atob(token.split('.')[1]));
+                        return decoded.id === swap.requesterId ? (swap.receiverName || 'Receiver') : (swap.requesterName || 'Requester');
+                      } catch { return 'User'; }
+                    })()}
+                  </span>
                 </div>
 
                 {swap.message && (
@@ -79,19 +93,53 @@ export default function MySwaps() {
                   </div>
                 )}
 
+                {swap.status === 'ACCEPTED' && swap.session?.meetingLink && (
+                  <div style={{ background: 'rgba(56, 189, 248, 0.1)', border: '1px solid rgba(56, 189, 248, 0.2)', padding: '1rem', borderRadius: '8px' }}>
+                    <div style={{ fontSize: '0.75rem', color: '#38bdf8', fontWeight: 'bold', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Communication Link</div>
+                    <a 
+                      href={swap.session.meetingLink} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="btn btn-primary"
+                      style={{ width: '100%', padding: '0.5rem', fontSize: '0.875rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                    >
+                      <span>📹</span> Join Learning Session
+                    </a>
+                  </div>
+                )}
+
                 <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                  {swap.status === 'PENDING' && (
-                    <>
-                      <button className="btn btn-primary" style={{ flex: 1 }} onClick={() => handleStatusUpdate(swap.id, 'accept')}>Accept</button>
-                      <button className="btn btn-secondary" style={{ flex: 1 }} onClick={() => handleStatusUpdate(swap.id, 'reject')}>Reject</button>
-                    </>
-                  )}
-                  {swap.status === 'ACCEPTED' && (
-                    <button className="btn btn-primary" style={{ flex: 1 }} onClick={() => handleStatusUpdate(swap.id, 'complete')}>Mark Completed</button>
-                  )}
-                  {swap.status === 'COMPLETED' && (
-                    <button className="btn btn-secondary" style={{ flex: 1 }} disabled>Feedback Given</button>
-                  )}
+                  {(() => {
+                    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+                    if (!token) return null;
+                    try {
+                      const decoded = JSON.parse(atob(token.split('.')[1]));
+                      const isReceiver = decoded.id === swap.receiverId;
+
+                      if (swap.status === 'PENDING') {
+                        if (isReceiver) {
+                          return (
+                            <>
+                              <button className="btn btn-primary" style={{ flex: 1 }} onClick={() => handleStatusUpdate(swap.id, 'accept')}>Accept</button>
+                              <button className="btn btn-secondary" style={{ flex: 1 }} onClick={() => handleStatusUpdate(swap.id, 'reject')}>Reject</button>
+                            </>
+                          );
+                        } else {
+                          return <div style={{ flex: 1, textAlign: 'center', color: '#94a3b8', fontSize: '0.875rem', padding: '0.5rem', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: '8px' }}>Waiting for Partner...</div>;
+                        }
+                      }
+
+                      if (swap.status === 'ACCEPTED') {
+                        return <button className="btn btn-primary" style={{ flex: 1 }} onClick={() => handleStatusUpdate(swap.id, 'complete')}>Mark Completed</button>;
+                      }
+
+                      if (swap.status === 'COMPLETED') {
+                        return <button className="btn btn-secondary" style={{ flex: 1 }} disabled>Feedback Given</button>;
+                      }
+                      
+                      return null;
+                    } catch { return null; }
+                  })()}
                 </div>
               </div>
             ))}

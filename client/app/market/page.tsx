@@ -10,6 +10,8 @@ export default function Market() {
   const [showModal, setShowModal] = useState(false);
   const [selectedSkill, setSelectedSkill] = useState<any>(null);
   const [message, setMessage] = useState('');
+  const [mySkills, setMySkills] = useState<any[]>([]);
+  const [offeredSkillId, setOfferedSkillId] = useState('');
   const [hours, setHours] = useState(1);
 
   useEffect(() => {
@@ -20,9 +22,24 @@ export default function Market() {
         setLoading(false);
       })
       .catch(() => setLoading(false));
+
+    // Fetch my own skills for the swap modal
+    const token = localStorage.getItem('token');
+    if (token) {
+        fetch(`${API_BASE_URL}/skills/my-skills`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+        .then(res => res.json())
+        .then(data => setMySkills(data.skills || []))
+        .catch(console.error);
+    }
   }, []);
 
   const handleRequest = async () => {
+    if (!offeredSkillId) {
+      alert('Please select a skill to offer in exchange!');
+      return;
+    }
     const token = localStorage.getItem('token');
     try {
       const res = await fetch(`${API_BASE_URL}/swaps/requests`, {
@@ -34,7 +51,7 @@ export default function Market() {
         body: JSON.stringify({
           receiverId: selectedSkill.userId,
           requestedSkillId: selectedSkill.id,
-          offeredSkillId: '1', // Mocked for now, in a real app would select own skill
+          offeredSkillId,
           message,
           hoursOffered: hours
         })
@@ -64,26 +81,48 @@ export default function Market() {
           <p>Loading skills...</p>
         ) : (
           <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
-            {skills.map((skill) => (
-              <div key={skill.id} className="glass card" style={{ display: 'flex', flexDirection: 'column' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
-                  <span className="badge badge-primary">{skill.category}</span>
-                  <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{skill.level}</span>
-                </div>
-                <h3 style={{ marginBottom: '0.5rem' }}>{skill.title}</h3>
-                <p style={{ fontSize: '0.875rem', color: '#94a3b8', flex: 1, marginBottom: '1.5rem' }}>{skill.description}</p>
-                <div style={{ borderTop: '1px solid var(--glass-border)', paddingTop: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ fontSize: '0.875rem' }}>
-                    <span style={{ color: '#94a3b8' }}>by </span>
-                    <span style={{ fontWeight: '600' }}>{skill.user?.name || 'User'}</span>
+            {skills.map((skill) => {
+                const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+                let isOwnSkill = false;
+                if (token) {
+                  try {
+                    const decoded = JSON.parse(atob(token.split('.')[1]));
+                    isOwnSkill = skill.userId === decoded.id;
+                  } catch {}
+                }
+
+                return (
+                  <div key={skill.id} className="glass card" style={{ display: 'flex', flexDirection: 'column', opacity: isOwnSkill ? 0.7 : 1 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
+                      <span className="badge badge-primary">{skill.category}</span>
+                      {isOwnSkill ? (
+                        <span className="badge" style={{ background: 'rgba(255,255,255,0.1)', color: '#94a3b8' }}>Your Skill</span>
+                      ) : (
+                        <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{skill.level}</span>
+                      )}
+                    </div>
+                    <h3 style={{ marginBottom: '0.5rem' }}>{skill.title}</h3>
+                    <p style={{ fontSize: '0.875rem', color: '#94a3b8', flex: 1, marginBottom: '1.5rem' }}>{skill.description}</p>
+                    <div style={{ borderTop: '1px solid var(--glass-border)', paddingTop: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ fontSize: '0.875rem' }}>
+                        <span style={{ color: '#94a3b8' }}>by </span>
+                        <span style={{ fontWeight: '600' }}>{isOwnSkill ? 'You' : (skill.user?.name || 'User')}</span>
+                      </div>
+                      {!isOwnSkill && (
+                        <button className="btn btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }} onClick={() => {
+                          const token = localStorage.getItem('token');
+                          if (!token) {
+                            window.location.href = '/login';
+                            return;
+                          }
+                          setSelectedSkill(skill);
+                          setShowModal(true);
+                        }}>Request Swap</button>
+                      )}
+                    </div>
                   </div>
-                  <button className="btn btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }} onClick={() => {
-                    setSelectedSkill(skill);
-                    setShowModal(true);
-                  }}>Request Swap</button>
-                </div>
-              </div>
-            ))}
+                );
+            })}
           </div>
         )}
 
@@ -94,6 +133,22 @@ export default function Market() {
           <div className="glass card animate-fade-in" style={{ width: '90%', maxWidth: '500px', padding: '2rem' }}>
             <h2 style={{ marginBottom: '1.5rem' }}>Request Swap: <span className="gradient-text">{selectedSkill.title}</span></h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: '#94a3b8' }}>Your skill to offer</label>
+                <select 
+                  value={offeredSkillId} 
+                  onChange={(e) => setOfferedSkillId(e.target.value)}
+                  style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', background: 'var(--secondary)', border: '1px solid var(--glass-border)', color: 'white' }}
+                >
+                  <option value="">Select a skill...</option>
+                  {mySkills.map(s => (
+                    <option key={s.id} value={s.id}>{s.title}</option>
+                  ))}
+                </select>
+                {mySkills.length === 0 && (
+                  <p style={{ fontSize: '0.75rem', color: 'var(--danger)', marginTop: '0.5rem' }}>You need to add a skill in your profile first!</p>
+                )}
+              </div>
               <div>
                 <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', color: '#94a3b8' }}>Hours requested</label>
                 <input type="number" value={hours} onChange={(e) => setHours(Number(e.target.value))} style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', background: 'var(--secondary)', border: '1px solid var(--glass-border)', color: 'white' }} />
