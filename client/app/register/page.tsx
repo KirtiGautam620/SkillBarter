@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { API_BASE_URL } from '@/constants';
 
 export default function Register() {
   const [name, setName] = useState('');
@@ -12,7 +13,7 @@ export default function Register() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:5001/api/auth/register', {
+      const res = await fetch(`${API_BASE_URL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password }),
