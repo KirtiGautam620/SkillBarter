@@ -9,11 +9,26 @@ export class UserEntity extends BaseEntity {
   public rating: number = 0;
   public reviewCount: number = 0;
 
-  constructor(id: string, name: string, email: string, password: string, createdAt?: Date, updatedAt?: Date) {
+  constructor(
+    id: string,
+    name: string,
+    email: string,
+    password: string,
+    bio?: string,
+    avatar?: string,
+    rating: number = 0,
+    reviewCount: number = 0,
+    createdAt?: Date,
+    updatedAt?: Date
+  ) {
     super(id, createdAt, updatedAt);
     this.name = name;
     this.email = email;
     this.password = password;
+    this.bio = bio;
+    this.avatar = avatar;
+    this.rating = rating;
+    this.reviewCount = reviewCount;
   }
 
   addReview(rating: number, comment: string): void {

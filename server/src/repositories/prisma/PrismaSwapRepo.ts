@@ -56,10 +56,11 @@ export class PrismaSwapRepo implements ISwapRepo {
         ],
       },
       include: {
-        requestedSkill: true,
+        requestedSkill: { include: { user: true } },
         offeredSkill: true,
         requester: true,
         receiver: true,
+        session: true,
       },
     });
     return swaps.map(swap => {
@@ -71,6 +72,8 @@ export class PrismaSwapRepo implements ISwapRepo {
       (swapEntity as any).offeredSkillTitle = swap.offeredSkill?.title ?? swap.offeredSkillId;
       (swapEntity as any).requesterName = swap.requester?.name ?? swap.requesterId;
       (swapEntity as any).receiverName = swap.receiver?.name ?? swap.receiverId;
+      (swapEntity as any).userRating = swap.requestedSkill?.user?.rating ?? 0;
+      (swapEntity as any).session = swap.session;
       return swapEntity;
     });
   }

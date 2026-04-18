@@ -11,12 +11,12 @@ export class PrismaUserRepo implements IUserRepo {
 
   async findById(id: string): Promise<UserEntity | null> {
     const user = await this.prisma.user.findUnique({ where: { id } });
-    return user ? new UserEntity(user.id, user.name, user.email, user.password, user.createdAt, user.updatedAt) : null;
+    return user ? new UserEntity(user.id, user.name, user.email, user.password, user.bio ?? undefined, user.avatar ?? undefined, user.rating, user.reviewCount, user.createdAt, user.updatedAt) : null;
   }
 
   async findByEmail(email: string): Promise<UserEntity | null> {
     const user = await this.prisma.user.findUnique({ where: { email } });
-    return user ? new UserEntity(user.id, user.name, user.email, user.password, user.createdAt, user.updatedAt) : null;
+    return user ? new UserEntity(user.id, user.name, user.email, user.password, user.bio ?? undefined, user.avatar ?? undefined, user.rating, user.reviewCount, user.createdAt, user.updatedAt) : null;
   }
 
   async create(user: UserEntity): Promise<UserEntity> {
@@ -32,7 +32,7 @@ export class PrismaUserRepo implements IUserRepo {
         reviewCount: user.reviewCount,
       }
     });
-    return new UserEntity(newUser.id, newUser.name, newUser.email, newUser.password, newUser.createdAt, newUser.updatedAt);
+    return new UserEntity(newUser.id, newUser.name, newUser.email, newUser.password, newUser.bio ?? undefined, newUser.avatar ?? undefined, newUser.rating, newUser.reviewCount, newUser.createdAt, newUser.updatedAt);
   }
 
   async update(id: string, user: Partial<UserEntity>): Promise<UserEntity> {
@@ -40,7 +40,7 @@ export class PrismaUserRepo implements IUserRepo {
       where: { id },
       data: user,
     });
-    return new UserEntity(updatedUser.id, updatedUser.name, updatedUser.email, updatedUser.password, updatedUser.createdAt, updatedUser.updatedAt);
+    return new UserEntity(updatedUser.id, updatedUser.name, updatedUser.email, updatedUser.password, updatedUser.bio ?? undefined, updatedUser.avatar ?? undefined, updatedUser.rating, updatedUser.reviewCount, updatedUser.createdAt, updatedUser.updatedAt);
   }
 
   async delete(id: string): Promise<void> {
