@@ -2,6 +2,10 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  bio?: string;
+  avatar?: string;
+  rating?: number;
+  reviewCount?: number;
 }
 
 export interface Skill {
