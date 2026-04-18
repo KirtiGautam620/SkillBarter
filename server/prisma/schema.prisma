@@ -3,96 +3,89 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
-  id          String   @id @default(cuid())
-  name        String
-  email       String   @unique
-  password    String
-  bio         String?
-  avatar      String?
-  rating      Float    @default(0)
-  reviewCount Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  skills              Skill[]
-  sentSwapRequests    SwapRequest[] @relation("Requester")
-  receivedSwapRequests SwapRequest[] @relation("Receiver")
-  reviewsGiven        Review[]      @relation("Reviewer")
-  reviewsReceived     Review[]      @relation("Reviewee")
-  timeCreditAccount   TimeCreditAccount?
-  notifications       Notification[]
+  id                   String             @id @default(cuid())
+  name                 String
+  email                String             @unique
+  password             String
+  bio                  String?
+  avatar               String?
+  rating               Float              @default(0)
+  reviewCount          Int                @default(0)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  notifications        Notification[]
+  reviewsReceived      Review[]           @relation("Reviewee")
+  reviewsGiven         Review[]           @relation("Reviewer")
+  skills               Skill[]
+  receivedSwapRequests SwapRequest[]      @relation("Receiver")
+  sentSwapRequests     SwapRequest[]      @relation("Requester")
+  timeCreditAccount    TimeCreditAccount?
 }
 
 model Skill {
-  id          String   @id @default(cuid())
-  title       String
-  description String
-  category    String
-  level       String   @default("Beginner")
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  userId            String
-  user              User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  offeredInSwaps    SwapRequest[] @relation("OfferedSkill")
-  requestedInSwaps  SwapRequest[] @relation("RequestedSkill")
+  id               String        @id @default(cuid())
+  title            String
+  description      String
+  category         String
+  level            String        @default("Beginner")
+  isActive         Boolean       @default(true)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  userId           String
+  user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  requestedInSwaps SwapRequest[] @relation("RequestedSkill")
+  offeredInSwaps   SwapRequest[] @relation("OfferedSkill")
 }
 
 model SwapRequest {
-  id             String   @id @default(cuid())
-  message        String?
-  status         String   @default("PENDING")
-  hoursOffered   Float    @default(1)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
+  id               String   @id @default(cuid())
+  message          String?
+  status           String   @default("PENDING")
+  hoursOffered     Float    @default(1)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
   requesterId      String
   receiverId       String
   offeredSkillId   String
   requestedSkillId String
-
-  requester      User    @relation("Requester", fields: [requesterId], references: [id])
-  receiver       User    @relation("Receiver", fields: [receiverId], references: [id])
-  offeredSkill   Skill   @relation("OfferedSkill", fields: [offeredSkillId], references: [id])
-  requestedSkill Skill   @relation("RequestedSkill", fields: [requestedSkillId], references: [id])
-
-  session  Session?
-  reviews  Review[]
+  reviews          Review[]
+  session          Session?
+  requestedSkill   Skill    @relation("RequestedSkill", fields: [requestedSkillId], references: [id])
+  offeredSkill     Skill    @relation("OfferedSkill", fields: [offeredSkillId], references: [id])
+  receiver         User     @relation("Receiver", fields: [receiverId], references: [id])
+  requester        User     @relation("Requester", fields: [requesterId], references: [id])
 }
 
 model Session {
-  id          String   @id @default(cuid())
-  scheduledAt DateTime
-  duration    Int      @default(60)
-  meetingLink String?
-  status      String   @default("SCHEDULED")
-  notes       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  swapRequestId String      @unique
-  swapRequest   SwapRequest @relation(fields: [swapRequestId], references: [id], onDelete: Cascade)
+  id                String      @id @default(cuid())
+  scheduledAt       DateTime?
+  duration          Int         @default(60)
+  meetingLink       String?
+  status            String      @default("SCHEDULED")
+  notes             String?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  swapRequestId     String      @unique
+  learningVideoLink String?
+  swapRequest       SwapRequest @relation(fields: [swapRequestId], references: [id], onDelete: Cascade)
 }
 
 model Review {
-  id        String   @id @default(cuid())
-  rating    Int
-  comment   String?
-  createdAt DateTime @default(now())
-
+  id            String      @id @default(cuid())
+  rating        Int
+  comment       String?
+  createdAt     DateTime    @default(now())
   reviewerId    String
   revieweeId    String
   swapRequestId String
-
-  reviewer    User        @relation("Reviewer", fields: [reviewerId], references: [id])
-  reviewee    User        @relation("Reviewee", fields: [revieweeId], references: [id])
-  swapRequest SwapRequest @relation(fields: [swapRequestId], references: [id], onDelete: Cascade)
+  swapRequest   SwapRequest @relation(fields: [swapRequestId], references: [id], onDelete: Cascade)
+  reviewee      User        @relation("Reviewee", fields: [revieweeId], references: [id])
+  reviewer      User        @relation("Reviewer", fields: [reviewerId], references: [id])
 }
 
 model TimeCreditAccount {
@@ -103,9 +96,8 @@ model TimeCreditAccount {
   totalSpent      Float    @default(0)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
-
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Notification {
@@ -115,7 +107,6 @@ model Notification {
   message   String
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
