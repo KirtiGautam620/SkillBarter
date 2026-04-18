@@ -31,6 +31,9 @@ export class SwapService {
     message?: string,
     hoursOffered: number = 1
   ): Promise<SwapRequestEntity> {
+    const requester = await this.userRepo.findById(requesterId);
+    const receiver = await this.userRepo.findById(receiverId);
+
     if (!requester || !receiver) {
       throw new Error('User not found');
     }
